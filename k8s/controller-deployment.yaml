@@ -4,7 +4,9 @@ metadata:
   name: remediation-controller
   namespace: self-healing
 spec:
-  replicas: 2
+  replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: remediation-controller
@@ -17,8 +19,8 @@ spec:
       automountServiceAccountToken: true
       containers:
         - name: controller
-          image: ghcr.io/abhishekchauhan9520/devops-project-39-self-healing-infrastructure:main
-          imagePullPolicy: Always
+          image: ghcr.io/abhishekchauhan9520/devops-project-39-self-healing-infrastructure:dev
+          imagePullPolicy: IfNotPresent
           env:
             - name: PORT
               value: "8080"
