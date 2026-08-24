@@ -1,0 +1,22 @@
+groups:
+  - name: self-healing
+    rules:
+      - alert: HighErrorRate
+        expr: up{job="self-healing-demo"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          namespace: self-healing
+        annotations:
+          summary: "Self-healing demo is unavailable"
+          remediation: "rollout_restart"
+
+      - alert: PodCrashLooping
+        expr: kube_pod_container_status_restarts_total{namespace="self-healing",pod=~"self-healing-demo-.*"} > 3
+        for: 2m
+        labels:
+          severity: warning
+          namespace: self-healing
+        annotations:
+          summary: "Self-healing demo is restarting repeatedly"
+          remediation: "rollout_restart"
