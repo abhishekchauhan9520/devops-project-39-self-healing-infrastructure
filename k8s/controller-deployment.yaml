@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: remediation-controller
+  namespace: self-healing
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: remediation-controller
+  template:
+    metadata:
+      labels:
+        app: remediation-controller
+    spec:
+      serviceAccountName: remediation-controller
+      automountServiceAccountToken: true
+      containers:
+        - name: controller
+          image: ghcr.io/abhishekchauhan9520/devops-project-39-self-healing-infrastructure:main
+          imagePullPolicy: Always
+          env:
+            - name: PORT
+              value: "8080"
+            - name: POLICY_PATH
+              value: /app/policy.yaml
+            - name: AUDIT_PATH
+              value: /app/audit/audit.jsonl
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8080
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+          volumeMounts:
+            - name: audit
+              mountPath: /app/audit
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: audit
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: remediation-controller
+  namespace: self-healing
+spec:
+  selector:
+    app: remediation-controller
+  ports:
+    - port: 8080
+      targetPort: 8080
