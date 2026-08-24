@@ -55,6 +55,16 @@ rollout_restart -> deployment/self-healing-demo
 
 The controller refuses unknown alerts, unknown actions, unknown workloads, and repeated remediation inside the cooldown window.
 
+## State-safety decision
+
+The lab controller runs as a **single replica** because cooldown and attempt state is intentionally in memory. Scaling it horizontally without shared state could allow duplicate remediation.
+
+A production implementation should replace this with a durable coordination mechanism such as a Kubernetes Lease, Redis, or another strongly consistent state store before running multiple replicas.
+
+## Container image
+
+CI publishes the controller to GHCR using the commit SHA. The Kubernetes manifest uses the `dev` tag for local/lab use; for deployment, update the image through the Kustomize bundle to the immutable SHA tag produced by CI.
+
 ## Limitations
 
 A live Prometheus/Kubernetes integration requires a real cluster. CI validates the controller, policy, manifests, and state-machine behavior without creating external infrastructure.
