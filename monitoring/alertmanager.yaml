@@ -1,0 +1,15 @@
+route:
+  receiver: default
+  routes:
+    - matchers:
+        - alertname=~"HighErrorRate|PodCrashLooping"
+      receiver: remediation-controller
+      continue: false
+
+receivers:
+  - name: default
+    webhook_configs: []
+  - name: remediation-controller
+    webhook_configs:
+      - url: http://remediation-controller.self-healing.svc.cluster.local:8080/webhook
+        send_resolved: false
