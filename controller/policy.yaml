@@ -1,0 +1,14 @@
+cooldown_seconds: 300
+max_attempts_per_incident: 2
+dry_run: false
+remediations:
+  HighErrorRate:
+    action: rollout_restart
+    namespace: self-healing
+    workload_kind: deployment
+    workload_name: self-healing-demo
+  PodCrashLooping:
+    action: rollout_restart
+    namespace: self-healing
+    workload_kind: deployment
+    workload_name: self-healing-demo
